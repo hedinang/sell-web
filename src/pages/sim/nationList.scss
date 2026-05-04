@@ -1,0 +1,255 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eee;
+}
+
+.topbar {
+  height: 52px;
+  background: #f4511e;
+  display: flex;
+  align-items: center;
+  padding: 0 22%;
+  gap: 24px;
+  color: white;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.search {
+  flex: 1;
+  display: flex;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.search input {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  outline: none;
+}
+
+.search button {
+  border: none;
+  background: white;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.phone,
+.account {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.container {
+  width: 1280px;
+  margin: 0 auto;
+  display: flex;
+}
+
+.content {
+  flex: 1;
+  background: white;
+  padding: 0 12px 30px;
+}
+
+.news-title {
+  height: 48px;
+  line-height: 48px;
+  color: #f4511e;
+  font-weight: bold;
+}
+
+.hero {
+  display: flex;
+  gap: 12px;
+}
+
+.banner {
+  width: 760px;
+  height: 260px;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner-track {
+  display: flex;
+  height: 260px;
+  transition: transform 0.5s ease-in-out;
+}
+
+.banner-item {
+  min-width: 100%;
+  height: 260px;
+}
+
+.banner-item img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.banner-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  border: none;
+  background: rgba(0, 0, 0, 0.25);
+  color: white;
+  font-size: 42px;
+  cursor: pointer;
+  width: 36px;
+  height: 54px;
+}
+
+.banner-prev {
+  left: 8px;
+}
+
+.banner-next {
+  right: 8px;
+}
+
+.news-box {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 16px;
+}
+
+.news-box h4 {
+  color: #1e88e5;
+}
+
+.play {
+  margin: 45px auto;
+  width: 120px;
+  height: 120px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  font-size: 46px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid #ddd;
+}
+
+.tabs div {
+  text-align: center;
+  padding: 12px;
+  border-right: 1px solid #ddd;
+}
+
+.promo {
+  margin: 18px 0;
+  background: #ef4444;
+  color: white;
+  font-size: 34px;
+  font-weight: bold;
+  padding: 18px;
+  text-align: center;
+  border-radius: 12px;
+}
+
+.promo span {
+  background: #fde68a;
+  color: #dc2626;
+  padding: 12px 28px;
+  border-radius: 10px;
+}
+
+.product-section {
+  position: relative;
+}
+
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  animation: fadeSlide 0.25s ease;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0.75;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-card img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+}
+
+.product-card h3 {
+  font-size: 15px;
+  font-weight: normal;
+  min-height: 58px;
+  width: 100%;
+  line-height: 1.4;
+}
+
+.stars {
+  color: #ff9800;
+  width: 100%;
+}
+
+.product-card p {
+  color: #f4511e;
+  font-weight: bold;
+  width: 100%;
+}
+.slide-left,
+.slide-right {
+  position: absolute;
+  top: 35%;
+  z-index: 2;
+  border: none;
+  background: rgba(0, 0, 0, 0.25);
+  color: white;
+
+  font-size: 42px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slide-left {
+  left: -10px;
+}
+
+.slide-right {
+  right: -10px;
+}
