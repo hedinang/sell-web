@@ -2,9 +2,21 @@ import { useState } from "react";
 import "./nationList.scss";
 
 const banners = [
-  "https://via.placeholder.com/760x260/f59e0b/ffffff?text=DU+LICH+SIM",
-  "https://via.placeholder.com/760x260/22c55e/ffffff?text=KHUYEN+MAI+ESIM",
-  "https://via.placeholder.com/760x260/3b82f6/ffffff?text=SIM+4G+5G",
+  {
+    name: "eSim du lịch Multi-region Europe",
+    price: "75.000 đ – 3.625.000 đ",
+    img: "https://sim4g.com/uploads/202408/x59uh5d1-Blue-And-White-Modern-Travel-Vlog-YouTube-Thumbnail.jpg",
+  },
+  {
+    name: "eSim du lịch Đài Loan Taiwan",
+    price: "70.000 đ – 1.585.000 đ",
+    img: "https://sim4g.com/uploads/202408/cx0jqd6s-wifi-690-300.jpg",
+  },
+  {
+    name: "eSim du lịch Đông Nam Á",
+    price: "70.000 đ – 3.080.000 đ",
+    img: "https://sim4g.com/uploads/202408/14ifjjj7-banner-home-left-1.png",
+  },
 ];
 
 const products = [
@@ -53,69 +65,68 @@ const NationList = () => {
   };
 
   const nextProduct = () => {
-  setProductIndex((prev) => (prev + 1) % products.length);
-};
+    setProductIndex((prev) => (prev + 1) % products.length);
+  };
 
-const prevProduct = () => {
-  setProductIndex((prev) => (prev - 1 + products.length) % products.length);
-};
+  const prevProduct = () => {
+    setProductIndex((prev) => (prev - 1 + products.length) % products.length);
+  };
 
   const getVisibleProducts = () => {
-  return Array.from({ length: 5 }, (_, i) => {
-    return products[(productIndex + i) % products.length];
-  });
-};
+    return Array.from({ length: 5 }, (_, i) => {
+      return products[(productIndex + i) % products.length];
+    });
+  };
+
+  const getVisibleBanners = () => {
+    return Array.from({ length: 1 }, (_, i) => {
+      return banners[(bannerIndex + i) % banners.length];
+    });
+  };
 
   const loopProducts = [...products, ...products];
+  const loopBanners = [...banners, ...banners];
 
   return (
     <div className="page">
-      <header className="topbar">
-        <div className="logo">SIM4G.COM</div>
-
-        <div className="search">
-          <input placeholder="Bạn tìm gì..." />
-          <button>🔍</button>
-        </div>
-
-        <div className="phone">0965887789</div>
-        <div className="account">👤 Tài khoản</div>
-      </header>
-
       <main className="container">
         <section className="content">
-          <div className="news-title">Tin tức</div>
+          {/* <div className="news-title">Tin tức</div> */}
 
-          <div className="hero">
-            <div className="banner">
-              <div
-                className="banner-track"
-                style={{
-                  transform: `translateX(-${bannerIndex * 100}%)`,
-                }}
-              >
-                {banners.map((item, index) => (
-                  <div className="banner-item" key={index}>
-                    <img src={item} alt={`banner-${index}`} />
-                  </div>
-                ))}
-              </div>
+          <div className="banner-section">
+            <button className="slide-banner-left" onClick={prevBanner}>
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path
+                  d="M15 18l-6-6 6-6"
+                  stroke="white"
+                  strokeWidth="2"
+                  fill="none"
+                />
+              </svg>
+            </button>
 
-              <button className="banner-arrow banner-prev" onClick={prevBanner}>
-                ‹
-              </button>
-              <button className="banner-arrow banner-next" onClick={nextBanner}>
-                ›
-              </button>
+            <div className="banner-list">
+              {getVisibleBanners().map((item, index) => (
+                <div className="banner-card" key={`${item.name}-${index}`}>
+                  <img src={item.img} alt={item.name} />
+                </div>
+              ))}
             </div>
-
-            <div className="news-box">
-              <h4>TIN TỨC ›</h4>
-              <div className="play">▶</div>
-            </div>
+            <button className="slide-banner-right" onClick={nextBanner}>
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path
+                  d="M9 6l6 6-6 6"
+                  stroke="white"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
 
-          <div className="tabs">
+          {/* <div className="tabs">
             <div>
               Sim du lịch
               <br />
@@ -136,43 +147,51 @@ const prevProduct = () => {
               <br />
               Giảm Đến 40%
             </div>
-          </div>
+          </div> */}
 
           <div className="promo">
             GIÁ CỰC TỐT CHỈ CÓ TRONG <span>THÁNG 1</span>
           </div>
 
           <div className="product-section">
-  <button className="slide-left" onClick={prevProduct}>
-    <svg width="20" height="20" viewBox="0 0 24 24">
-    <path d="M15 18l-6-6 6-6" stroke="white" strokeWidth="2" fill="none"/>
-  </svg>
-  </button>
+            <button className="slide-left" onClick={prevProduct}>
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path
+                  d="M15 18l-6-6 6-6"
+                  stroke="white"
+                  strokeWidth="2"
+                  fill="none"
+                />
+              </svg>
+            </button>
 
-  <div className="product-list">
-    {getVisibleProducts().map((item, index) => (
-      <div className="product-card text-center" key={`${item.name}-${index}`}>
-        <img src={item.img} alt={item.name} />
-        <h3>{item.name}</h3>
-        <div className="stars">★★★★★</div>
-        <p>{item.price}</p>
-      </div>
-    ))}
-  </div>
+            <div className="product-list">
+              {getVisibleProducts().map((item, index) => (
+                <div
+                  className="product-card text-center"
+                  key={`${item.name}-${index}`}
+                >
+                  <img src={item.img} alt={item.name} />
+                  <h3>{item.name}</h3>
+                  <div className="stars">★★★★★</div>
+                  <p>{item.price}</p>
+                </div>
+              ))}
+            </div>
 
-  <button className="slide-right" onClick={nextProduct}>
-    <svg viewBox="0 0 24 24" width="20" height="20">
-    <path
-      d="M9 6l6 6-6 6"
-      stroke="white"
-      strokeWidth="2"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-  </button>
-</div>
+            <button className="slide-right" onClick={nextProduct}>
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path
+                  d="M9 6l6 6-6 6"
+                  stroke="white"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
         </section>
       </main>
     </div>
@@ -180,4 +199,3 @@ const prevProduct = () => {
 };
 
 export { NationList };
-
