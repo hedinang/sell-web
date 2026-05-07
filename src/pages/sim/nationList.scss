@@ -127,7 +127,8 @@ body {
   position: relative;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 50px;
 }
 
 .banner-list {
@@ -137,18 +138,6 @@ body {
   animation: fadeSlide 0.25s ease;
 }
 
-// @keyframes fadeSlide {
-//   from {
-//     opacity: 0.75;
-//     transform: translateX(12px);
-//   }
-
-//   to {
-//     opacity: 1;
-//     transform: translateX(0);
-//   }
-// }
-
 .banner-card {
   display: flex;
   flex-direction: column;
@@ -157,8 +146,8 @@ body {
 }
 
 .banner-card img {
-  // width: 180px;
-  // height: 180px;
+  width: 690px;
+  height: 300px;
   object-fit: cover;
 }
 

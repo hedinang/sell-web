@@ -3,18 +3,12 @@ import "./nationList.scss";
 
 const banners = [
   {
-    name: "eSim du lịch Multi-region Europe",
-    price: "75.000 đ – 3.625.000 đ",
     img: "https://sim4g.com/uploads/202408/x59uh5d1-Blue-And-White-Modern-Travel-Vlog-YouTube-Thumbnail.jpg",
   },
   {
-    name: "eSim du lịch Đài Loan Taiwan",
-    price: "70.000 đ – 1.585.000 đ",
     img: "https://sim4g.com/uploads/202408/cx0jqd6s-wifi-690-300.jpg",
   },
   {
-    name: "eSim du lịch Đông Nam Á",
-    price: "70.000 đ – 3.080.000 đ",
     img: "https://sim4g.com/uploads/202408/14ifjjj7-banner-home-left-1.png",
   },
 ];
@@ -84,15 +78,10 @@ const NationList = () => {
     });
   };
 
-  const loopProducts = [...products, ...products];
-  const loopBanners = [...banners, ...banners];
-
   return (
     <div className="page">
       <main className="container">
         <section className="content">
-          {/* <div className="news-title">Tin tức</div> */}
-
           <div className="banner-section">
             <button className="slide-banner-left" onClick={prevBanner}>
               <svg width="20" height="20" viewBox="0 0 24 24">
@@ -112,6 +101,7 @@ const NationList = () => {
                 </div>
               ))}
             </div>
+
             <button className="slide-banner-right" onClick={nextBanner}>
               <svg viewBox="0 0 24 24" width="20" height="20">
                 <path
@@ -125,29 +115,6 @@ const NationList = () => {
               </svg>
             </button>
           </div>
-
-          {/* <div className="tabs">
-            <div>
-              Sim du lịch
-              <br />
-              Giảm Sốc Đến 30%
-            </div>
-            <div>
-              Wifi 4G 5G
-              <br />
-              Giảm Sốc Đến 39%
-            </div>
-            <div>
-              Gia Dụng Xả Kho
-              <br />
-              Giảm Đến 30%
-            </div>
-            <div>
-              Phụ Kiện Xả Kho
-              <br />
-              Giảm Đến 40%
-            </div>
-          </div> */}
 
           <div className="promo">
             GIÁ CỰC TỐT CHỈ CÓ TRONG <span>THÁNG 1</span>

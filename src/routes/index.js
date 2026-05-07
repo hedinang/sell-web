@@ -4,17 +4,16 @@ import AuthLayout from "../components/layouts/AuthLayout";
 import { PublicLayout } from "../components/layouts/PublicLayout";
 import { ItemProvider } from "../context/ItemContext";
 import { AdminBidList } from "../pages/bid/AdminBidList";
-import { BidList } from "../pages/bid/BidList";
 import { OrderList } from "../pages/cart/OrderList";
 import { AdminItemDetail } from "../pages/item/AdminItemDetail";
 import { AdminItemList } from "../pages/item/AdminItemList";
 import { ItemDetail } from "../pages/item/ItemDetail";
-import { ItemList } from "../pages/item/ItemList";
 import Login from "../pages/login";
 import { MailManagement } from "../pages/mail/MailManagement";
-import { UserManagement } from "../pages/user/UserManagement";
-import { SimList } from "../pages/sim/SimList";
 import { NationList } from "../pages/sim/NationList";
+import { SimList } from "../pages/sim/SimList";
+import { UserManagement } from "../pages/user/UserManagement";
+import { SupplierDetail } from "../pages/sim/SupplierDetail";
 
 const router = createBrowserRouter([
   {
@@ -38,20 +37,12 @@ const router = createBrowserRouter([
         element: <NationList />,
       },
       {
-        path: "/item-list/:bidId/:bidStatus",
-        element: (
-          <ItemProvider>
-            <ItemList />
-          </ItemProvider>
-        ),
+        path: "/sim/search/:condition",
+        element: <SimList />,
       },
       {
-        path: "/item-detail/:itemId",
-        element: (
-          <ItemProvider>
-            <ItemDetail />
-          </ItemProvider>
-        ),
+        path: "/sim/supplier/:supplierId",
+        element: <SupplierDetail />,
       },
     ],
   },

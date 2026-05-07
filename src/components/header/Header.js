@@ -1,26 +1,62 @@
-import { Col, Dropdown, Row } from "antd";
+import { Dropdown } from "antd";
+import { useNavigate } from "react-router-dom";
 import "./style.scss";
-import { FiMoreHorizontal } from "react-icons/fi";
 
 export const Header = () => {
+  const navigate = useNavigate();
+  const generateLabel = (text, key) => (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleMenuClick(key);
+      }}
+    >
+      {text}
+    </button>
+  );
+
   const conversationOption = [
     {
       key: "vn",
-      label: "sim việt nam",
+      label: generateLabel("sim việt nam", "vn"),
       children: [
-        { key: "viettel", label: "sim 4g viettel" },
-        { key: "vina", label: "sim 4g vina" },
-        { key: "mobile", label: "sim 4g mobile" },
+        {
+          key: "viettel",
+          label: "sim 4g viettel",
+          label: generateLabel("sim việt nam", "vn"),
+        },
+        {
+          key: "vina",
+          label: "sim 4g vina",
+          label: generateLabel("sim việt nam", "vn"),
+        },
+        {
+          key: "mobile",
+          label: "sim 4g mobile",
+          label: generateLabel("sim việt nam", "vn"),
+        },
       ],
     },
-    { key: "hk", label: "sim hong kong" },
-    { key: "tw", label: "sim đài loan" },
+    {
+      key: "hk",
+      label: generateLabel("sim hong kong", "hk"),
+    },
+    {
+      key: "tw",
+      label: generateLabel("sim đài loan", "tw"),
+    },
   ];
+
+  const handleMenuClick = (e) => {
+    navigate(`/sim/search/${e}`);
+  };
 
   return (
     <>
       <header className="topbar-1">
-        <div className="logo">SIMBADINH.COM</div>
+        <button className="logo" onClick={() => navigate("/nation-list")}>
+          SIMBADINH.COM
+        </button>
 
         <div className="search">
           <input placeholder="Bạn tìm gì..." />
@@ -37,10 +73,10 @@ export const Header = () => {
         <Dropdown
           menu={{
             items: conversationOption,
-            // onClick: handleMenuClick
+            onClick: handleMenuClick,
           }}
           placement="bottomLeft"
-          trigger={["click"]}
+          trigger={["hover"]}
         >
           <button
             // icon={<DashOutlined />}

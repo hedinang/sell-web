@@ -6,13 +6,14 @@
 .right-footer {
   text-align: right;
   padding: 20px;
+  display: flex;
+  gap: 2px;
 }
 
 @media (max-width: 767px) {
   .left-footer {
     padding: 0px;
     text-align: center;
-    
   }
 
   .right-footer {
