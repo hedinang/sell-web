@@ -47,6 +47,7 @@ const products = [
 ];
 
 const NationList = () => {
+
   const [bannerIndex, setBannerIndex] = useState(0);
   const [productIndex, setProductIndex] = useState(0);
 

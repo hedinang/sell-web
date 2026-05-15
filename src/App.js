@@ -7,17 +7,20 @@ import {ToastContainer} from 'react-toastify';
 import {ConfigProvider, theme} from "antd";
 import './styles/style.scss'
 import './styles/table.scss'
+import {CartProvider} from "./context/CartContext";
 
 function App() {
 
 
-    return (
-        <ConfigProvider theme={theme}>
-            <RouterProvider router={Router}/>
-            <ToastContainer autoClose={1500}/>
-        </ConfigProvider>
+  return (
+      <ConfigProvider theme={theme}>
+        <CartProvider>
+          <RouterProvider router={Router}/>
+          <ToastContainer autoClose={1500}/>
+        </CartProvider>
+      </ConfigProvider>
 
-    );
+  );
 }
 
 export default App;

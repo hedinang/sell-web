@@ -1,14 +1,17 @@
-import { Button, Select } from "antd";
-import { useState } from "react";
-import { IoArrowBackSharp, IoCheckmarkCircle } from "react-icons/io5";
+import {Button, Divider, InputNumber, Select} from "antd";
+import {useEffect, useState} from "react";
+import {IoArrowBackSharp, IoCheckmarkCircle} from "react-icons/io5";
+import {useCartContext} from "../../context/CartContext";
+import {MdPhoneEnabled} from "react-icons/md";
 
 const SupplierDetail = () => {
+  const {orderList, setOrderList} = useCartContext();
+
   const [supplier, setSupplier] = useState({
     id: 3,
     name: "Sim 3",
     title:
-      "eSim du lịch châu âu 38 nước - Europe C, dùng full mạng xã hội, Nhận QR Ngay | Hico",
-    price: 150000,
+        "eSim du lịch châu âu 38 nước - Europe C, dùng full mạng xã hội, Nhận QR Ngay | Hico",
     img: "https://sim4g.com/uploads/202510/2hz5fejn.jpg",
     advantages: [
       "Tặng ngay 500GB Data tốc độ cao mỗi tháng vào đầu chu kỳ",
@@ -19,138 +22,252 @@ const SupplierDetail = () => {
       "Hỗ trợ làm Esim, đăng ký chính chủ",
       "Sim sử dụng toàn quốc không giới hạn",
     ],
+    priceList: [
+      {
+        time: 1,
+        pack: "500MB",
+        unit: 150000,
+      },
+      {
+        time: 1,
+        pack: "1GB",
+        unit: 200000,
+      },
+      {
+        time: 7,
+        pack: "500MB",
+        unit: 150000,
+      },
+      {
+        time: 30,
+        pack: "500MB",
+        unit: 150000,
+      },
+    ],
   });
 
+  const [cart, setCart] = useState({
+    time: null,
+    pack: null,
+    unit: 0,
+    quantity: 1,
+    price: 0
+  });
+
+  const onChangeTime = (value) => {
+    setCart(prev => {
+      if (prev?.pack) {
+        const p = supplier.priceList.find((item) => {
+          return item.time === value && item.pack === prev.pack;
+        });
+
+        return {
+          ...prev, time: value, unit: p?.unit, price: p?.unit * prev?.quantity
+        }
+      }
+
+      return {...prev, time: value}
+    })
+  };
+
+  const onChangePackage = (value) => {
+    setCart(prev => {
+      if (prev?.time) {
+        const p = supplier.priceList.find((item) => {
+          return item.pack === value && item.time === prev.time;
+        });
+
+        return {
+          ...prev, pack: value, unit: p?.unit, price: p?.unit * prev?.quantity
+        }
+      }
+
+      return {...prev, pack: value}
+    })
+  };
+
+  const onChangeQuantity = (value) => {
+    setCart((prev) => {
+      return {...prev, quantity: value, price: prev?.unit * value}
+    });
+  };
+
+  const sharedProps = {
+    mode: "spinner",
+    min: 1,
+    onChange: onChangeQuantity,
+    style: {width: 150},
+  };
+
+  const addToCart = () => {
+    setOrderList((prev) => {
+      const index = prev.findIndex((item) => item.id === supplier.id);
+      if (index !== -1) {
+        prev[index] = {
+          id: supplier?.id,
+          name: supplier?.name,
+          title: supplier?.title,
+          time: cart?.time,
+          pack: cart?.pack,
+          price: cart?.price,
+          quantity: cart?.quantity,
+          unit: cart?.unit
+        }
+        return [...prev];
+      }
+
+      return [
+        ...prev,
+        {
+          id: supplier?.id,
+          name: supplier?.name,
+          title: supplier?.title,
+          time: cart?.time,
+          pack: cart?.pack,
+          price: cart?.price,
+          quantity: cart?.quantity,
+          unit: cart?.unit
+        },
+      ];
+    });
+  };
+
+  useEffect(() => {
+    if (!orderList?.length) return
+
+    const s = orderList?.find(order => order?.id === supplier?.id);
+    setCart({time: s?.time, pack: s?.pack, unit: s?.unit, quantity: s?.quantity, price: s?.price});
+  }, [])
+
   return (
-    <div className="flex flex-col items-center h-[765px]">
-      <div className="flex gap-[10px] items-center text-xl font-semibold text-center py-[20px]">
-        <button>
-          <IoArrowBackSharp size={24} />
-        </button>
-        <div>{supplier?.title}</div>
-      </div>
-      <div className="flex gap-[50px]">
-        <img
-          src={supplier.img}
-          alt={supplier.name}
-          className="w-[470px] h-[470px] object-cover"
-        />
-
-        <div>
-          <div className="text-[#ea5626] text-[23px] mb-[10px] text-center font-semibold">
-            {supplier?.price.toLocaleString()} VND
-          </div>
-          {supplier?.advantages?.map((item, index) => {
-            return (
-              <div className="flex items-center gap-2" key={index}>
-                <IoCheckmarkCircle color="#3fb846" />
-                <div>{item}</div>
-              </div>
-            );
-          })}
-
-          <div className="flex items-center gap-[5px] mt-[30px]">
-            <div>Thời gian</div>
-            <Select
-              placeholder="Chọn thời gian"
-              allowClear
-              className="w-[200px]"
-              //   value={searchOrder?.search?.category}
-              //   onChange={(e) => onChangeFilter("category", e)}
-              options={[
-                { value: "1", label: "1 ngày" },
-                { value: "7", label: "7 ngày" },
-                { value: "30", label: "30 ngày" },
-              ]}
-            />
-          </div>
-
-          <div className="flex items-center gap-[5px] mt-[30px]">
-            <div>Gói cước</div>
-            <Select
-              placeholder="Chọn gói cước"
-              allowClear
-              className="w-[200px]"
-              //   value={searchOrder?.search?.category}
-              //   onChange={(e) => onChangeFilter("category", e)}
-              options={[
-                { value: "500mb", label: "500MB/ Ngày" },
-                { value: "1gb", label: "1GB/ Ngày" },
-                { value: "2gb", label: "2GB/ Ngày" },
-              ]}
-            />
-          </div>
-
-          <div className="flex gap-[100px] mt-[30px]">
-            <div className="flex flex-col">
-              <div>Giá bán</div>
-              <div>2,880,000₫</div>
-            </div>
-
-            <div className="flex flex-col">
-              <div>Số lượng</div>
-              <div>1</div>
-            </div>
-          </div>
-
-          <div className="flex gap-[100px] mt-[30px]">
-            <Button className="bg-[#fc7119] text-white">Them gio hang</Button>
-            <Button className="bg-[#0098fc] text-white">Mua ngay</Button>
-          </div>
+      <div className="flex flex-col items-center h-[765px]">
+        <div className="flex gap-[10px] items-center text-xl font-semibold text-center py-[20px]">
+          <button>
+            <IoArrowBackSharp size={24}/>
+          </button>
+          <div>{supplier?.title}</div>
         </div>
+        <div className="flex gap-[50px]">
+          <img
+              src={supplier.img}
+              alt={supplier.name}
+              className="w-[470px] h-[470px] object-cover"
+          />
 
-        <div className="w-[270px] rounded border border-gray-300 bg-white px-3 py-4 text-sm">
-          <h2 className="text-center text-xl font-bold text-orange-600">
-            TƯ VẤN MUA HÀNG
-          </h2>
-          <div className="my-12 border-t border-gray-200" />
+          <div>
+            <div className="text-[#ea5626] text-[23px] mb-[10px] text-center font-semibold">
+              {/* {supplier?.price.toLocaleString()} VND */}
+            </div>
+            {supplier?.advantages?.map((item, index) => {
+              return (
+                  <div className="flex items-center gap-2" key={index}>
+                    <IoCheckmarkCircle color="#3fb846"/>
+                    <div>{item}</div>
+                  </div>
+              );
+            })}
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 border-b pb-3">
+            <div className="flex items-center gap-[5px] mt-[30px]">
+              <div>Thời gian</div>
+              <Select
+                  placeholder="Chọn thời gian"
+                  allowClear
+                  className="w-[200px]"
+                  value={cart?.time}
+                  onChange={onChangeTime}
+                  options={[
+                    {value: 1, label: "1 ngày"},
+                    {value: 7, label: "7 ngày"},
+                    {value: 30, label: "30 ngày"},
+                  ]}
+              />
+            </div>
+
+            <div className="flex items-center gap-[5px] mt-[30px]">
+              <div>Gói cước</div>
+              <Select
+                  placeholder="Chọn gói cước"
+                  allowClear
+                  className="w-[200px]"
+                  value={cart?.pack}
+                  onChange={onChangePackage}
+                  options={[
+                    {value: "500MB", label: "500MB/ Ngày"},
+                    {value: "1GB", label: "1GB/ Ngày"},
+                    {value: "2GB", label: "2GB/ Ngày"},
+                  ]}
+              />
+            </div>
+
+            <div className="flex gap-[100px] mt-[30px]">
+              <div className="flex flex-col w-[150px] gap-[5px]">
+                <div>Giá bán</div>
+                <div className="text-[#ea5626]">
+                  {cart?.price?.toLocaleString()} ₫
+                </div>
+              </div>
+
+              <div className="flex flex-col w-[150px] gap-[5px]">
+                <div>Số lượng</div>
+                <InputNumber
+                    {...sharedProps}
+                    placeholder="Outlined"
+                    value={cart?.quantity}
+                    onChange={onChangeQuantity}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-[100px] mt-[30px]">
+              <Button className="bg-[#fc7119] text-white w-[150px]"
+                      onClick={addToCart}>
+                Thêm giỏ hàng
+              </Button>
+              <Button
+                  className="bg-[#0098fc] text-white w-[150px]"
+                  onClick={addToCart}
+              >
+                Mua ngay
+              </Button>
+            </div>
+          </div>
+
+          <div className="w-[270px] rounded border border-gray-300 bg-white px-3 py-4 text-sm">
+            <h2 className="text-center text-xl font-bold text-orange-600">
+              TƯ VẤN MUA HÀNG
+            </h2>
+            <Divider/>
+            <div className="flex items-center gap-3">
               <div className="relative text-green-500">
-                {/* <Phone size={28} /> */}
-                {/* <MessageCircle size={16} className="absolute -top-2 left-4" /> */}
-                dsd
+                <MdPhoneEnabled/>
               </div>
               <p>
-                <span className="font-bold text-blue-500">0965 887 789</span>
+                <span className="font-bold text-blue-500">0392200524</span>
                 <span> (8:30 - 21:00)</span>
               </p>
             </div>
-
-            <div className="flex items-center gap-3 border-b pb-3">
+            <Divider/>
+            <div className="flex items-center gap-3">
               <div className="relative text-green-500">
-                {/* <Phone size={28} /> */}
-                {/* <MessageCircle size={16} className="absolute -top-2 left-4" /> */}
-                dsd
+                <MdPhoneEnabled/>
               </div>
               <p>
-                <span className="font-bold text-blue-500">0987 379 884</span>
+                <span className="font-bold text-blue-500">0392200524</span>
                 <span> (19:00 - 23:00)</span>
               </p>
             </div>
-
-            <div className="flex gap-3">
-              {/* <MapPin className="mt-1 text-green-500" size={28} /> */}
-              <div className="space-y-5 leading-6">
-                <p className="text-blue-500">
-                  Số 43, Ngõ 159 Pháo Đài Láng, phường Láng, Tp Hà Nội
-                </p>
-                <p>KDC Nam Long, P. Tân Thuận, Tp Hồ Chí Minh</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 border-b pb-4">
-              {/* <Truck className="text-green-500" size={34} /> */}
-              <p className="leading-6">
-                Hỗ trợ giao hàng hỏa tốc nhận trong ngày
-              </p>
-            </div>
+            <Divider/>
+            <p className="text-blue-500">
+              Số 43, Ngõ 159 Pháo Đài Láng, phường Láng, Tp Hà Nội
+            </p>
+            <Divider/>
+            <p className="leading-6">
+              Hỗ trợ giao hàng hỏa tốc nhận trong ngày
+            </p>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
-export { SupplierDetail };
+export {SupplierDetail};
