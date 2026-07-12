@@ -1,8 +1,10 @@
+export const AUTHEN = "/auth/";
+export const ORDER = "/order/";
+export const USER = "/user/";
+export const ADMIN = "/bid/";
+export const MAIL = "/mail/";
+export const RESOURCE = "/resource/";
+export const STORAGE = "/storage/";
+
 export const LOGIN = "/user/login";
-export const AUTHEN = "/api/auth";
-export const BID = "/api/bid";
-export const ORDER = "/api/order";
-export const USER = "/api/user";
-export const ADMIN = "/api/bid";
-export const ITEM = "/api/item";
-export const MAIL = "/api/mail";
+export const SIM = "/sim/";

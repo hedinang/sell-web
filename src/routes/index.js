@@ -32,7 +32,6 @@ const router = createBrowserRouter([
     // path: "/",
     element: (
         <PublicLayout/>
-
     ),
     children: [
       {
@@ -52,57 +51,6 @@ const router = createBrowserRouter([
         element: <OrderList/>,
       },
     ],
-  },
-  {
-    // path: "/",
-    element: <AuthLayout/>,
-    children: [
-      {
-        path: "/inside/bid/bid-list",
-        element: <AdminBidList/>,
-      },
-      {
-        path: "/inside/bid/item-list/:bidId/:bidStatus",
-        element: (
-            <ItemProvider>
-              <AdminItemList/>
-            </ItemProvider>
-        ),
-      },
-      {
-        path: "/inside/bid/item-detail/:itemId",
-        element: (
-            <ItemProvider>
-              <AdminItemDetail/>
-            </ItemProvider>
-        ),
-      },
-      {
-        path: "/inside/users",
-        element: (
-            <ItemProvider>
-              <UserManagement/>
-            </ItemProvider>
-        ),
-      },
-
-      {
-        path: "/user-list",
-        element: (
-            <ItemProvider>
-              <UserManagement/>
-            </ItemProvider>
-        ),
-      },
-      {
-        path: "/mail-list",
-        element: (
-            <ItemProvider>
-              <MailManagement/>
-            </ItemProvider>
-        ),
-      },
-    ],
-  },
+  }
 ]);
 export default router;

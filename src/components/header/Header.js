@@ -5,11 +5,82 @@ import {useNavigate} from "react-router-dom";
 import "./style.scss";
 import {useCartContext} from "../../context/CartContext";
 import Search from "antd/es/input/Search";
+import {useState} from "react";
+import {LoginModal} from "../modal/LoginModal";
+import {useLayoutContext} from "../../context/LayoutContext";
+import {ProfileModal} from "../modal/ProfileModal";
+import {getViewUrl} from "../../api/originalStorageApi";
+
+const MeDropdown = ({}) => {
+  const {me, logout} = useLayoutContext()
+  const [isModalProfileOpen, setIsModalProfileOpen] = useState(false);
+
+  const openProfileModal = async() => {
+    setIsModalProfileOpen(true);
+  }
+
+  const closeProfilerModal = () => {
+    setIsModalProfileOpen(false);
+  }
+
+  const options = [
+    {
+      key: "profile",
+      label: <button
+          onClick={openProfileModal}
+      >
+        Thông tin tài khoản
+      </button>
+    },
+    {
+      key: "setting",
+      label: "Cài đặt",
+    },
+    {
+      key: "logout",
+      label: <button
+          onClick={logout}
+      >
+        Đăng xuất
+      </button>
+    },
+  ];
+
+  return <div>
+    <Dropdown
+        menu={{
+          items: options,
+          // onClick: handleMenuClick,
+        }}
+        placement="bottomLeft"
+        trigger={["hover"]}
+    >
+      <button
+          // icon={<DashOutlined />}
+          type="text"
+          size="small"
+          onClick={(e) => e?.stopPropagation?.()}
+      >
+        {me?.name}
+      </button>
+    </Dropdown>
+
+    {isModalProfileOpen && (
+        <ProfileModal
+            closeModal={closeProfilerModal}
+            isModalOpen={isModalProfileOpen}
+        />
+    )}
+  </div>
+}
 
 export const Header = () => {
   const navigate = useNavigate();
 
   const {orderList} = useCartContext();
+  const {me} = useLayoutContext()
+  const [isOpenLogin, setIsOpenLogin] = useState(false);
+
   const generateLabel = (text, key) => (
       <button
           onClick={(e) => {
@@ -28,17 +99,14 @@ export const Header = () => {
       children: [
         {
           key: "viettel",
-          label: "sim 4g viettel",
           label: generateLabel("sim việt nam", "vn"),
         },
         {
           key: "vina",
-          label: "sim 4g vina",
           label: generateLabel("sim việt nam", "vn"),
         },
         {
           key: "mobile",
-          label: "sim 4g mobile",
           label: generateLabel("sim việt nam", "vn"),
         },
       ],
@@ -57,6 +125,11 @@ export const Header = () => {
     navigate(`/sim/search/${e}`);
   };
 
+  const cancelLogin = () => {
+    setIsOpenLogin(false);
+  }
+
+
   return (
       <>
         <div className="topbar-1">
@@ -64,16 +137,14 @@ export const Header = () => {
             SIMBADINH.COM
           </button>
 
-          <div>
-            <Input
-                placeholder={
-                  "Bạn tìm gì..."
-                }
-                className="w-full"
-                prefix={<IoSearchOutline size={15}/>}
-                allowClear
-            />
-          </div>
+          <Input
+              placeholder={
+                "Bạn tìm gì..."
+              }
+              className="max-w-[500px] min-w-[200px]"
+              prefix={<IoSearchOutline size={15}/>}
+              allowClear
+          />
 
           <button
               className="flex items-center gap-[1px]"
@@ -88,14 +159,15 @@ export const Header = () => {
             <MdPhone size={18}/>
             <div>0975896865</div>
           </div>
-          <div className="flex items-center gap-[1px]">
-            <MdAccountCircle size={18}/>
-            <div>Tài khoản</div>
-          </div>
+          {me ? <MeDropdown/> :
+              <button className="flex items-center gap-[1px]" onClick={() => setIsOpenLogin(true)}>
+                <MdAccountCircle size={18}/>
+                <div>Đăng nhập</div>
+              </button>}
         </div>
 
         <div className="topbar-2">
-          <div>Trang chủ</div>
+          <button onClick={() => navigate("/nation-list")}>Trang chủ</button>
           <div>Tin tức</div>
           <Dropdown
               menu={{
@@ -117,6 +189,8 @@ export const Header = () => {
           <div>Khuyến mãi</div>
           <div>Chính sách</div>
         </div>
+
+        {isOpenLogin && <LoginModal open={isOpenLogin} onCancel={cancelLogin}/>}
       </>
   );
 };
