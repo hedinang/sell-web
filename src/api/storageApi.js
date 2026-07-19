@@ -34,8 +34,8 @@ export const uploadFileWithUppy = async ({
       })
 
       return {
-        uploadId: result.uploadId,
-        key: result.objectKey,
+        uploadId: result?.data?.uploadId,
+        key: result?.data?.objectKey,
       };
     },
 
@@ -58,7 +58,7 @@ export const uploadFileWithUppy = async ({
       })
 
       return {
-        url: response.uploadUrl,
+        url: response?.data?.uploadUrl,
       };
     },
 
@@ -86,7 +86,7 @@ export const uploadFileWithUppy = async ({
       })
 
       return {
-        location: result.url,
+        location: result?.data?.url,
         ...result,
       };
     },

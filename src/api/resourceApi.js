@@ -43,11 +43,11 @@ class ResourceApi extends BaseApi {
 
 
   init(body) {
-    return this.post("free" + STORAGE + "init", body);
+    return this.post("free" + STORAGE + "create-multipart", body);
   }
 
   partUrl(body) {
-    return this.post("free" + STORAGE + "part-url", body);
+    return this.post("free" + STORAGE + "create-part-url", body);
   }
 
   complete(body) {
