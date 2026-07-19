@@ -44,81 +44,6 @@ const ProfileModal = ({isModalOpen, closeModal}) => {
     return true;
   };
 
-  const handleUpload2 = async ({file}) => {
-    const rawFile = file?.originFileObj ?? file;
-
-    if (!(rawFile instanceof Blob)) {
-      return;
-    }
-
-    try {
-      setProgress(0);
-      setStatus("UPLOADING");
-
-      await ensureBucketExists("videos");
-
-      // const upload = createMultipartUpload({
-      //   file: rawFile,
-      //   bucket: "videos",
-      //   objectKey: `${uuidv4()}-${rawFile.name}`,
-      //
-      //   onProgress: ({percent, loaded, total}) => {
-      //     setProgress(percent);
-      //
-      //     console.log({
-      //       percent,
-      //       loaded,
-      //       total,
-      //     });
-      //   },
-      // });
-
-      const upload = await uploadMultipartFile(
-          {
-            file: rawFile,
-            onProgress: ({percent, loaded, total}) => {
-              setProgress(percent);
-
-              console.log({
-                percent,
-                loaded,
-                total,
-              })
-            },
-            signal: null
-          })
-
-
-      currentUploadRef.current = upload;
-
-      const result = await upload.start();
-
-      setProgress(100);
-      setStatus("COMPLETED");
-
-      const res = await apiFactory.userApi.upload({
-        avatar: result?.Location
-      });
-
-      if (res?.status === 200) {
-        toast.success("Cập nhật avatar thành công")
-        setMe(prev => ({...prev, avatar: result?.Location}));
-      }
-
-      console.log("Upload thành công:", result);
-    } catch (error) {
-      if (error?.name === "AbortError") {
-        setStatus("CANCELLED");
-        return;
-      }
-
-      console.error("Upload thất bại:", error);
-      setStatus("FAILED");
-    } finally {
-      currentUploadRef.current = null;
-    }
-  };
-
   const handleUpload = async ({
                                 file,
                                 onProgress,
@@ -145,12 +70,12 @@ const ProfileModal = ({isModalOpen, closeModal}) => {
       setStatus("COMPLETED");
 
       const res = await apiFactory.userApi.upload({
-        avatar: result?.response?.location
+        avatar: result?.location
       });
 
       if (res?.status === 200) {
         toast.success("Cập nhật avatar thành công")
-        setMe(prev => ({...prev, avatar: result?.response?.location}));
+        setMe(prev => ({...prev, avatar: result?.location}));
       }
 
       onSuccess?.(result);
@@ -253,10 +178,6 @@ const ProfileModal = ({isModalOpen, closeModal}) => {
               Ảnh đại diện:
             </div>
             <div className="mt-3 flex gap-[20px]">
-              <Upload customRequest={handleUpload}>
-                <Button>Click to Upload</Button>
-              </Upload>
-
               <div className="relative">
                 {genderAvatar}
 

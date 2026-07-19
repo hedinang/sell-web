@@ -2,6 +2,9 @@ import Uppy from "@uppy/core";
 import AwsS3 from "@uppy/aws-s3";
 import apiFactory from "./index";
 
+const CHUNK_SIZE = 10 * 1024 * 1024;
+const CONCURRENCY = 3;
+
 export const uploadFileWithUppy = async ({
                                            file,
                                            onProgress,
@@ -162,19 +165,14 @@ export const uploadMultipartFile = async ({
     throw new Error("File không tồn tại");
   }
 
-  const contentType =
-      file.type || "application/octet-stream";
-
   let uploadId;
   let objectKey;
 
   try {
-    // 1. Khởi tạo multipart upload.
     const initResponse = await apiFactory.resourceApi.init({
       fileName: file.name,
       fileSize: file.size,
-      contentType:
-          contentType || "application/octet-stream",
+      contentType: file.type || "application/octet-stream"
     })
 
     uploadId = initResponse.data.uploadId;
@@ -182,7 +180,6 @@ export const uploadMultipartFile = async ({
 
     const chunks = createChunks(file);
 
-    // Lưu số byte đã upload của từng part.
     const loadedByPart = new Map();
 
     const completedParts = [];
@@ -192,64 +189,56 @@ export const uploadMultipartFile = async ({
       concurrency: CONCURRENCY,
 
       worker: async (chunk) => {
-        const signResponse = await apiFactory.resourceApi.partUrl({
+        const partPresignedResponse = await apiFactory.resourceApi.partUrl({
           uploadId: uploadId,
           objectKey: objectKey,
-          partNumber: chunk.partNumber
+          partNumber: chunk?.partNumber
         })
 
-        const uploadUrl =
-            signResponse.data.uploadUrl;
+        const uploadedResponse = await apiFactory.resourceApi.uploadFile(partPresignedResponse?.data?.uploadUrl,
+            chunk.blob, {
+              signal,
+              onUploadProgress: ({
+                                   loaded,
+                                   rate,
+                                   estimated,
+                                 }) => {
+                loadedByPart.set(
+                    chunk.partNumber,
+                    Math.min(loaded, chunk.size),
+                );
 
-        const uploadResponse = await apiFactory.resourceApi.uploadFile(uploadUrl, chunk.blob, {
-          signal,
+                const totalLoaded = Array.from(
+                    loadedByPart.values(),
+                ).reduce(
+                    (sum, value) => sum + value,
+                    0,
+                );
 
-          headers: {
-            "Content-Type":
-                "application/octet-stream",
-          },
+                const percent = Math.min(
+                    100,
+                    Math.round(
+                        (totalLoaded * 100) /
+                        file.size,
+                    ),
+                );
 
-          onUploadProgress: ({
-                               loaded,
-                               rate,
-                               estimated,
-                             }) => {
-            loadedByPart.set(
-                chunk.partNumber,
-                Math.min(loaded, chunk.size),
-            );
-
-            const totalLoaded = Array.from(
-                loadedByPart.values(),
-            ).reduce(
-                (sum, value) => sum + value,
-                0,
-            );
-
-            const percent = Math.min(
-                100,
-                Math.round(
-                    (totalLoaded * 100) /
-                    file.size,
-                ),
-            );
-
-            onProgress?.({
-              percent,
-              loaded: totalLoaded,
-              total: file.size,
-              rate,
-              estimated,
-              partNumber:
-              chunk.partNumber,
-              totalParts:
-              chunks.length,
-            });
-          },
-        })
+                onProgress?.({
+                  percent,
+                  loaded: totalLoaded,
+                  total: file.size,
+                  rate,
+                  estimated,
+                  partNumber:
+                  chunk.partNumber,
+                  totalParts:
+                  chunks.length,
+                });
+              },
+            })
 
         const etag = normalizeEtag(
-            uploadResponse.headers.etag,
+            uploadedResponse.headers.etag,
         );
 
         completedParts.push({
@@ -270,7 +259,6 @@ export const uploadMultipartFile = async ({
     );
 
     // 4. Complete multipart upload.
-
     const completeResponse = await apiFactory.resourceApi.complete({
       uploadId,
       objectKey: objectKey,
@@ -290,25 +278,12 @@ export const uploadMultipartFile = async ({
 
     return completeResponse.data;
   } catch (error) {
-    /*
-     * Nếu đã init thành công nhưng upload thất bại/hủy,
-     * yêu cầu backend abort để xóa các part tạm.
-     */
     if (uploadId && objectKey) {
-      try {
-        const result = await apiFactory.resourceApi.abort({
-          uploadId,
-          objectKey: objectKey,
-        })
-      } catch (abortError) {
-        console.error(
-            "Abort multipart upload thất bại:",
-            abortError,
-        );
-      }
+      const result = await apiFactory.resourceApi.abort({
+        uploadId,
+        objectKey,
+      })
     }
-
-    throw error;
   }
 };
 
@@ -367,8 +342,6 @@ const runWithConcurrency = async ({
   await Promise.all(runners);
 };
 
-const CHUNK_SIZE = 10 * 1024 * 1024;
-const CONCURRENCY = 3;
 
 const normalizeEtag = (etag) => {
   if (!etag) {
