@@ -152,3 +152,230 @@ export const uploadFileWithUppy = async ({
     uppy.destroy();
   }
 };
+
+export const uploadMultipartFile = async ({
+                                            file,
+                                            onProgress,
+                                            signal,
+                                          }) => {
+  if (!file) {
+    throw new Error("File không tồn tại");
+  }
+
+  const contentType =
+      file.type || "application/octet-stream";
+
+  let uploadId;
+  let objectKey;
+
+  try {
+    // 1. Khởi tạo multipart upload.
+    const initResponse = await apiFactory.resourceApi.init({
+      fileName: file.name,
+      fileSize: file.size,
+      contentType:
+          contentType || "application/octet-stream",
+    })
+
+    uploadId = initResponse.data.uploadId;
+    objectKey = initResponse.data.objectKey;
+
+    const chunks = createChunks(file);
+
+    // Lưu số byte đã upload của từng part.
+    const loadedByPart = new Map();
+
+    const completedParts = [];
+
+    await runWithConcurrency({
+      items: chunks,
+      concurrency: CONCURRENCY,
+
+      worker: async (chunk) => {
+        const signResponse = await apiFactory.resourceApi.partUrl({
+          uploadId: uploadId,
+          objectKey: objectKey,
+          partNumber: chunk.partNumber
+        })
+
+        const uploadUrl =
+            signResponse.data.uploadUrl;
+
+        const uploadResponse = await apiFactory.resourceApi.uploadFile(uploadUrl, chunk.blob, {
+          signal,
+
+          headers: {
+            "Content-Type":
+                "application/octet-stream",
+          },
+
+          onUploadProgress: ({
+                               loaded,
+                               rate,
+                               estimated,
+                             }) => {
+            loadedByPart.set(
+                chunk.partNumber,
+                Math.min(loaded, chunk.size),
+            );
+
+            const totalLoaded = Array.from(
+                loadedByPart.values(),
+            ).reduce(
+                (sum, value) => sum + value,
+                0,
+            );
+
+            const percent = Math.min(
+                100,
+                Math.round(
+                    (totalLoaded * 100) /
+                    file.size,
+                ),
+            );
+
+            onProgress?.({
+              percent,
+              loaded: totalLoaded,
+              total: file.size,
+              rate,
+              estimated,
+              partNumber:
+              chunk.partNumber,
+              totalParts:
+              chunks.length,
+            });
+          },
+        })
+
+        const etag = normalizeEtag(
+            uploadResponse.headers.etag,
+        );
+
+        completedParts.push({
+          partNumber: chunk.partNumber,
+          etag,
+        });
+
+        // Đảm bảo progress part hoàn thành bằng đúng size.
+        loadedByPart.set(
+            chunk.partNumber,
+            chunk.size,
+        );
+      },
+    });
+
+    completedParts.sort(
+        (a, b) => a.partNumber - b.partNumber,
+    );
+
+    // 4. Complete multipart upload.
+
+    const completeResponse = await apiFactory.resourceApi.complete({
+      uploadId,
+      objectKey: objectKey,
+      parts: completedParts,
+    })
+
+    // return {
+    //   location: result?.data?.url,
+    //   ...result,
+    // };
+
+    onProgress?.({
+      percent: 100,
+      loaded: file.size,
+      total: file.size,
+    });
+
+    return completeResponse.data;
+  } catch (error) {
+    /*
+     * Nếu đã init thành công nhưng upload thất bại/hủy,
+     * yêu cầu backend abort để xóa các part tạm.
+     */
+    if (uploadId && objectKey) {
+      try {
+        const result = await apiFactory.resourceApi.abort({
+          uploadId,
+          objectKey: objectKey,
+        })
+      } catch (abortError) {
+        console.error(
+            "Abort multipart upload thất bại:",
+            abortError,
+        );
+      }
+    }
+
+    throw error;
+  }
+};
+
+const createChunks = (file) => {
+  const chunks = [];
+
+  let partNumber = 1;
+
+  for (
+      let start = 0;
+      start < file.size;
+      start += CHUNK_SIZE
+  ) {
+    const end = Math.min(
+        start + CHUNK_SIZE,
+        file.size,
+    );
+
+    chunks.push({
+      partNumber,
+      blob: file.slice(start, end),
+      size: end - start,
+    });
+
+    partNumber += 1;
+  }
+
+  return chunks;
+};
+
+const runWithConcurrency = async ({
+                                    items,
+                                    concurrency,
+                                    worker,
+                                  }) => {
+  let currentIndex = 0;
+
+  const runners = Array.from(
+      {
+        length: Math.min(concurrency, items.length),
+      },
+      async () => {
+        while (true) {
+          const index = currentIndex;
+          currentIndex += 1;
+
+          if (index >= items.length) {
+            return;
+          }
+
+          await worker(items[index], index);
+        }
+      },
+  );
+
+  await Promise.all(runners);
+};
+
+const CHUNK_SIZE = 10 * 1024 * 1024;
+const CONCURRENCY = 3;
+
+const normalizeEtag = (etag) => {
+  if (!etag) {
+    throw new Error(
+        "Không đọc được ETag. Hãy kiểm tra CORS ExposeHeaders.",
+    );
+  }
+
+  return etag.replaceAll('"', "");
+};

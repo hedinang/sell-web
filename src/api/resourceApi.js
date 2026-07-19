@@ -1,5 +1,6 @@
 import {RESOURCE, STORAGE} from "./apiConstant";
 import BaseApi from "./baseApi";
+import axios from "axios";
 
 class ResourceApi extends BaseApi {
   constructor() {
@@ -56,6 +57,18 @@ class ResourceApi extends BaseApi {
 
   abort(body) {
     return this.post("free" + STORAGE + "abort", body);
+  }
+
+  uploadFile(presignedUrl, file, config) {
+    return axios.put(
+        presignedUrl,
+        file,
+        {
+          headers: {
+            "Content-Type": "application/octet-stream",
+          }
+        }
+    );
   }
 }
 

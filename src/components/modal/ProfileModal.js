@@ -12,7 +12,7 @@ import {LoadingOutlined} from "@ant-design/icons";
 import {MdDelete} from "react-icons/md";
 import {v4 as uuidv4} from "uuid";
 import {createMultipartUpload, ensureBucketExists} from "../../api/originalStorageApi";
-import {uploadFileWithUppy} from "../../api/storageApi";
+import {uploadFileWithUppy, uploadMultipartFile} from "../../api/storageApi";
 
 const ProfileModal = ({isModalOpen, closeModal}) => {
   const {me, logout, setMe} = useLayoutContext();
@@ -57,21 +57,37 @@ const ProfileModal = ({isModalOpen, closeModal}) => {
 
       await ensureBucketExists("videos");
 
-      const upload = createMultipartUpload({
-        file: rawFile,
-        bucket: "videos",
-        objectKey: `${uuidv4()}-${rawFile.name}`,
+      // const upload = createMultipartUpload({
+      //   file: rawFile,
+      //   bucket: "videos",
+      //   objectKey: `${uuidv4()}-${rawFile.name}`,
+      //
+      //   onProgress: ({percent, loaded, total}) => {
+      //     setProgress(percent);
+      //
+      //     console.log({
+      //       percent,
+      //       loaded,
+      //       total,
+      //     });
+      //   },
+      // });
 
-        onProgress: ({percent, loaded, total}) => {
-          setProgress(percent);
+      const upload = await uploadMultipartFile(
+          {
+            file: rawFile,
+            onProgress: ({percent, loaded, total}) => {
+              setProgress(percent);
 
-          console.log({
-            percent,
-            loaded,
-            total,
-          });
-        },
-      });
+              console.log({
+                percent,
+                loaded,
+                total,
+              })
+            },
+            signal: null
+          })
+
 
       currentUploadRef.current = upload;
 
@@ -113,10 +129,10 @@ const ProfileModal = ({isModalOpen, closeModal}) => {
       setProgress(0);
       setStatus("UPLOADING");
 
-      const result = await uploadFileWithUppy({
+      const result = await uploadMultipartFile({
         file,
 
-        onProgress: ({ percent }) => {
+        onProgress: ({percent}) => {
           setProgress(percent);
 
           onProgress?.({
@@ -238,7 +254,7 @@ const ProfileModal = ({isModalOpen, closeModal}) => {
             </div>
             <div className="mt-3 flex gap-[20px]">
               <Upload customRequest={handleUpload}>
-                <Button >Click to Upload</Button>
+                <Button>Click to Upload</Button>
               </Upload>
 
               <div className="relative">
